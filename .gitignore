@@ -8,3 +8,5 @@ package-lock.json
 .env           # Environment files
 .DS_Store      # macOS system file
 *.log          # Log files
+.gitignore     # Git ignore file
+.vscode/       # Visual Studio Code settings
