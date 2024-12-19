@@ -1,0 +1,35 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+table {
+    border: 1px solid black;
+    border-spacing: 0;
+    padding: 0;
+    width: 100%;
+    height: 90%;
+}
+
+td {
+    height: 40px;
+    width: 40px;
+    text-align: center;
+}
+
+.flex-container {
+    display: flex;
+    align-items: center;
+}
+
+.flex-container > * {
+    display: flex;
+    flex: 50%;
+    justify-content: center;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+.slider{
+    background-color: #808080;
+}
