@@ -29,18 +29,29 @@ td {
 
 .flex-container > * {
     display: flex;
-    flex: 50%;
     justify-content: center;
     margin-left: 5%;
     margin-right: 5%;
     font-size: x-large;
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
-.slider{
+
+
+
+
+#slider{
     background-color: #808080;
+    flex: 75%;
+}
+#difficultyDropdown{
+    flex: 25%;
 }
 td {
     font-size: x-large;
     line-height: 1.2em;
     margin: 5px 0;
   }
+
+#tries{
+    display: none;
+}

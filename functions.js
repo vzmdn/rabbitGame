@@ -1,3 +1,4 @@
+
 let tries = 0;
 let rabbitCell;
 let rabbitCellId;
@@ -11,6 +12,8 @@ let topWall = [];
 let leftWall = [];
 let rightWall = [];
 let bottomWall = [];
+let startTime;
+let endTime;
 
 startGame();
 
@@ -32,18 +35,14 @@ function startGame() {
     paintCells();
     startCells();
     initWalls();
+    startTime = new Date().getTime();
 }
 
 function refreshGame() {
-    tries = 0;
-    document.getElementById("tries").innerHTML = `Tries: ${tries}`;
     clearEventListeners();
     clearWalls();
     currentArrows = [];
-    createCells();
-    paintCells();
-    startCells();
-    initWalls();
+    startGame();
 }
 
 function clearEventListeners() {
@@ -202,20 +201,34 @@ function newPosition() {
     return -1;
 }
 
+function calculateScore() {
+    const baseScore = 10_000;
+    const timebonus = (endTime-startTime) / 10_000; //expected time: 10 seconds
+    const triesBonus = tries/10; //expected tries: 10
+    const difficultyBonus = 15/difficulty; //max difficulty = max bonus
+    const mapBonus = (rowsNum*1,5)/12; //max map size = max bonus
+
+    return (baseScore/(timebonus * triesBonus)) * difficultyBonus * mapBonus;
+}
+
 //LISTENERS
 //listener rabbitFound
 function rabbitFound() {
+    endTime = new Date().getTime();
     rabbitCell.innerHTML = "🐰";
     tries++;
+    const score = parseInt(calculateScore());
     document.getElementById("tries").innerHTML = `Tries: ${tries}`;
     for (let i = 0; i < rowsNum * rowsNum; i++) {
         let td = document.getElementById(`td${i}`);
         td.removeEventListener("click", normalCell);
         td.removeEventListener("click", rabbitFound);
     }
-    let message = tries === 1
+    /*let message = tries === 1
         ? `You found the rabbit on the first try!`
         : `You found the rabbit in ${tries} tries!`;
+        message += `\nTime: ${(endTime - startTime) / 1000} seconds`;*/
+        message = `Score ${score}`;
         
     window.electronAPI.showMessageBox({
         title: "Rabbit Found!",
