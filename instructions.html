@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/instructions.css">
+    <title>Rabbit game</title>
+</head>
+<body style="background-image: url('files/bg.jpg');">
+    <p>How to play</p>
+    <div class="container">
+        <img src="files/demo.gif" id="demo">
+        <div id="instructions">
+            <ul>
+                <li>You need to find the hidden rabbit.</li>
+                <li>Each time you click a cell,
+                    there will be an arrow pointing
+                    to the rabbit's location.</li>
+                </li>
+                <li>The rabbit will move one cell in
+                    any direction after each try.
+                </li>
+                <li>Good luck!</li>
+            </ul>
+        </div>
+    </div>
+    <button id="playBtn">START</button>
+
+    <script>
+        const playBtn = document.getElementById('playBtn');
+        playBtn.addEventListener('click', () => {
+            window.electronAPI.openGame();
+        });
+    </script>
+</body>
+</html>

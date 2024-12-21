@@ -1,21 +1,49 @@
-//const { app, BrowserWindow} = require('electron');
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const path = require('path');
 
-//let mainWindow;
+//INSTRUCTIONS WINDOW
+function createInstructionsWindow() {
+    const instructionsWin = new BrowserWindow({
+        width: 615,
+        height: 535,
+        resizable: false,
+        maximizable: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: true,
+            contextIsolation: true // Required for IPC
+        }
+    });
 
+    instructionsWin.loadFile('instructions.html');
+    instructionsWin.setMenuBarVisibility(false);
+    instructionsWin.setAutoHideMenuBar(true);
+
+    // Listen for the 'open-game' event from the renderer process
+    ipcMain.on('open-game', () => {
+        instructionsWin.close();
+        createWindow();
+    });
+}
+
+app.whenReady().then(createInstructionsWindow);
+
+//MAIN WINDOW
 function createWindow() {
     const win = new BrowserWindow({
         width: 750,
         height: 840,
         webPreferences: {
-            preload: `${__dirname}/preload.js`,
-            nodeIntegration: true
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: true,
+            contextIsolation: true
         }
     });
 
-    win.loadFile('index.html');
+    win.loadFile('game.html');
+    win.setMenuBarVisibility(false);
+    win.setAutoHideMenuBar(true);
 }
-
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -25,12 +53,9 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        createInstructionsWindow();
     }
 });
-
-app.whenReady().then(createWindow);
-
 
 ipcMain.handle("show-message-box", async (_, { title, message, buttons }) => {
     const response = await dialog.showMessageBox({
@@ -42,22 +67,3 @@ ipcMain.handle("show-message-box", async (_, { title, message, buttons }) => {
     
     return response; // Optionally, return a response if you need to handle button clicks or results in the renderer
 });
-// Handle requests from renderer to open dialog
-/*ipcMain.handle('show-open-dialog', async (event, options) => {
-    const result = await dialog.showOpenDialog(mainWindow, options);
-    return result;
-});
-
-ipcMain.handle('show-save-dialog', async (event, options) => {
-    const result = await dialog.showSaveDialog(mainWindow, options);
-    return result;
-});
-
-ipcMain.handle('show-message-box', async (event, options) => {
-    const result = await dialog.showMessageBox(mainWindow, options);
-    return result;
-});
-
-ipcMain.on('show-error-box', (event, { title, content }) => {
-    dialog.showErrorBox(title, content);
-});*/

@@ -71,7 +71,7 @@ function createCells() {
     for (let i = 0; i < rowsNum; i++) {
         rows += `<tr id=tr${i}>`;
         for (let n = 0; n < rowsNum; n++) {
-            rows += `<td id=td${cells}></td>`;
+            rows += `<td id=td${cells}>‍‍‍ </td>`;
             cells++;
         }
         rows += `</tr>`;
@@ -216,6 +216,7 @@ function rabbitFound() {
     let message = tries === 1
         ? `You found the rabbit on the first try!`
         : `You found the rabbit in ${tries} tries!`;
+        
     window.electronAPI.showMessageBox({
         title: "Rabbit Found!",
         message: message,
