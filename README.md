@@ -1,4 +1,4 @@
-<div style="background-image: url('files/readMeBg.jpg'); height: 100vh; background-position: center; background-repeat: no-repeat; background-size: cover; display: flex; align-items: center; justify-content: center; text-align: center;">
+<div style="background-image: url('[files/readMeBg.jpg](https://github.com/vzmdn/rabbitGame/blob/master/files/readMeBG.jpg?raw=true)'); height: 100vh; background-position: center; background-repeat: no-repeat; background-size: cover; display: flex; align-items: center; justify-content: center; text-align: center;">
 
 <div style="color: rgba(0, 0, 0, 0.774); font-size: 16px; padding: 20px; background: rgba(255, 255, 255, 0.8); border-radius: 8px;">
 Antes había un abuelo que lleva pelo naranja y vivía cerca del mar. Le encantaba el color naranja. Entonces tenía una huerta bonita donde habia zanahorias, naranjas, calabazas, mangos. Él vivía muy tranquilo con su huerta naranja, pero un día había un crucero gigante aparcado en la playa donde vivía. Él pensaba que iba a ser amigos con gente nueva pero de sorpresa ha salido muchos conejos del barco. Como lo sabemos, el conejo come zanahoria.
