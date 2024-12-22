@@ -1,5 +1,3 @@
-# Background Image with Centered Text
-
 <div style="background-image: url('files/readMeBg.jpg'); height: 100vh; background-position: center; background-repeat: no-repeat; background-size: cover; display: flex; align-items: center; justify-content: center; text-align: center;">
 
 <div style="color: rgba(0, 0, 0, 0.774); font-size: 16px; padding: 20px; background: rgba(255, 255, 255, 0.8); border-radius: 8px;">
