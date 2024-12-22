@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "electron": "^33.2.1"
+    "electron": "^33.2.1",
+    "electron-json-storage": "^4.6.0"
   }
 }

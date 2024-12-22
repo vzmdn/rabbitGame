@@ -1,36 +1,49 @@
-
-let tries = 0;
-let rabbitCell;
-let rabbitCellId;
-let difficulty = 3; //lower -> harder
-let currentArrows = [];
 let slider = document.getElementById("slider");
-let dropdown = document.getElementById("difficultyDropdown");
 let rowsNum = parseInt(slider.value);
-let endGame = false;
 let topWall = [];
 let leftWall = [];
 let rightWall = [];
 let bottomWall = [];
+
+let dropdown = document.getElementById("difficultyDropdown");
+let difString = "medium";
+let difficulty = 3; //lower -> harder
+let currentArrows = [];
+let tries = 0;
+
+let rabbitCell;
+let rabbitCellId;
+
 let startTime;
 let endTime;
-
-startGame();
+let endGame = false;
 
 slider.addEventListener("input", (event) => {
     rowsNum = parseInt(event.target.value);
     refreshGame();
+    saveSettings();
 });
 
 dropdown.addEventListener("change", (event) => {
     changeDifficulty(event);
     refreshGame();
+    saveSettings();
+});
+
+window.electronAPI.loadSettings().then(settings => {
+    if (settings && Object.keys(settings).length > 0) {
+        rowsNum = settings.rowsNum || rowsNum;
+        difficulty = settings.difficulty || difficulty;
+        difString = settings.difString || difString;
+        slider.value = rowsNum;
+        dropdown.value = difString;
+    }
+    startGame();
 });
 
 function startGame() {
-    console.log("startGame called");
+    console.log("new game started");
     tries = 0;
-    document.getElementById("tries").innerHTML = `Tries: ${tries}`;
     createCells();
     paintCells();
     startCells();
@@ -45,22 +58,6 @@ function refreshGame() {
     startGame();
 }
 
-function clearEventListeners() {
-    for (let i = 0; i < rowsNum * rowsNum; i++) {
-        let td = document.getElementById(`td${i}`);
-        if (td) {
-            td.removeEventListener("click", normalCell);
-            td.removeEventListener("click", rabbitFound);
-        }
-    }
-       
-}
- function clearWalls() {
-        topWall = [];
-        leftWall = [];
-        rightWall = [];
-        bottomWall = [];
-    }
 
 //START GAME FUNCTIONS
 function createCells() {
@@ -93,26 +90,10 @@ function startCells() {
     setNormalCells();
 }
 
-function initWalls() {
-    for (let i = 0; i < rowsNum * rowsNum; i++) {
-        let row = Math.floor(i / rowsNum);
-        let col = i % rowsNum;
-        if (row === 0) topWall.push(i);
-        if (col === 0) leftWall.push(i);
-        if (col === rowsNum - 1) rightWall.push(i);
-        if (row === rowsNum - 1) bottomWall.push(i);
-    }
-    console.log("topwall: " + topWall);
-    console.log("leftwall: " + leftWall);
-    console.log("rightwall:" + rightWall);
-    console.log("bottomwall: " + bottomWall);
-}
-
 function startRabbit() {
     rabbitCellId = Math.floor(Math.random() * rowsNum * rowsNum);
     rabbitCell = document.getElementById(`td${rabbitCellId}`);
     rabbitCell.addEventListener("click", rabbitFound);
-    console.log(rabbitCell);
     return rabbitCell;
 }
 
@@ -124,23 +105,46 @@ function setNormalCells() {
     }
 }
 
+function initWalls() {
+    for (let i = 0; i < rowsNum * rowsNum; i++) {
+        let row = Math.floor(i / rowsNum);
+        let col = i % rowsNum;
+        if (row === 0) topWall.push(i);
+        if (col === 0) leftWall.push(i);
+        if (col === rowsNum - 1) rightWall.push(i);
+        if (row === rowsNum - 1) bottomWall.push(i);
+    }
+}
+
+//REFRESH GAME FUNCTIONS
+function clearEventListeners() {
+    for (let i = 0; i < rowsNum * rowsNum; i++) {
+        let td = document.getElementById(`td${i}`);
+        if (td) {
+            td.removeEventListener("click", normalCell);
+            td.removeEventListener("click", rabbitFound);
+        }
+    }
+}
+function clearWalls() {
+    topWall = [];
+    leftWall = [];
+    rightWall = [];
+    bottomWall = [];
+}
+
 //LOGIC FUNCTIONS
 function rabbitCellMoves() {
     let canMove = false;
     let newRabbitCellId;
     do {
         newRabbitCellId = newPosition();
-        console.log(`new position ${newRabbitCellId}`);
-
         if (newRabbitCellId < 0 || newRabbitCellId >= (rowsNum * rowsNum) || newRabbitCellId == -1)
             continue;
         else canMove = true;
     } while (!canMove);
 
     if (canMove) {
-        console.log("///////////////////////")
-        console.log("rabbit moves")
-        console.log("///////////////////////")
         rabbitCell.removeEventListener("click", rabbitFound);
         rabbitCell.addEventListener("click", normalCell);
         rabbitCell.innerHTML = "";
@@ -153,9 +157,6 @@ function rabbitCellMoves() {
 
 function newPosition() {
     let direction = Math.floor(Math.random() * 8);
-    console.log(`direction: ${direction}`);
-    console.log(`current position: ${rabbitCellId}`);
-    console.log(`rowsNum: ${rowsNum}`);
     switch (direction) {
         case 0:
             //↖️
@@ -202,13 +203,28 @@ function newPosition() {
 }
 
 function calculateScore() {
-    const baseScore = 10_000;
-    const timebonus = (endTime-startTime) / 10_000; //expected time: 10 seconds
-    const triesBonus = tries/10; //expected tries: 10
-    const difficultyBonus = 15/difficulty; //max difficulty = max bonus
-    const mapBonus = (rowsNum*1,5)/12; //max map size = max bonus
+    console.log("tries", tries);
+    console.log("difficulty", difficulty);
+    console.log("map tiles", rowsNum*rowsNum);
+    console.log("time", endTime-startTime);
 
-    return (baseScore/(timebonus * triesBonus)) * difficultyBonus * mapBonus;
+    const baseScore = 10_000;
+    const time = endTime - startTime;
+    const timebonus = time / 10_000; //expected time: 10 seconds
+    const triesBonus = tries / 10; //expected tries: 10
+    const difficultyBonus = 15 / difficulty; //max difficulty = max bonus
+    const mapBonus = (rowsNum * 5) / 8; //max map size = max bonus
+
+    return (baseScore / (timebonus * triesBonus)) * difficultyBonus * mapBonus;
+}
+
+function saveSettings() {
+    const settings = {
+        rowsNum: rowsNum,
+        difficulty: difficulty,
+        difString: difString
+    };
+    window.electronAPI.saveSettings(settings);
 }
 
 //LISTENERS
@@ -218,18 +234,13 @@ function rabbitFound() {
     rabbitCell.innerHTML = "🐰";
     tries++;
     const score = parseInt(calculateScore());
-    document.getElementById("tries").innerHTML = `Tries: ${tries}`;
     for (let i = 0; i < rowsNum * rowsNum; i++) {
         let td = document.getElementById(`td${i}`);
         td.removeEventListener("click", normalCell);
         td.removeEventListener("click", rabbitFound);
     }
-    /*let message = tries === 1
-        ? `You found the rabbit on the first try!`
-        : `You found the rabbit in ${tries} tries!`;
-        message += `\nTime: ${(endTime - startTime) / 1000} seconds`;*/
-        message = `Score ${score}`;
-        
+    message = `Score ${score.toLocaleString()}`;
+
     window.electronAPI.showMessageBox({
         title: "Rabbit Found!",
         message: message,
@@ -275,7 +286,6 @@ function normalCell(event) {
 
     currentArrows.push(tdId);
     tries++;
-    document.getElementById("tries").innerHTML = `Tries: ${tries}`;
 
     if (currentArrows.length > difficulty) {
         let lastCell = document.getElementById(`td${currentArrows[0]}`);
@@ -286,13 +296,13 @@ function normalCell(event) {
 
 //listener changeDifficulty
 function changeDifficulty(event) {
-    let n = parseInt(event.target.value);
-    switch (n) {
-        case 1: difficulty = 15; break;
-        case 2: difficulty = 10; break;
-        case 3: difficulty = 5; break;
-        case 4: difficulty = 3; break;
-        case 5: difficulty = 1; break;
+    difString = event.target.value;
+    switch (difString) {
+        case "veryEasy": difficulty = 15; break;
+        case "easy": difficulty = 10; break;
+        case "medium": difficulty = 5; break;
+        case "hard": difficulty = 3; break;
+        case "extreme": difficulty = 1; break;
     }
     refreshGame();
 }

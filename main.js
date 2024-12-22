@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const storage = require('electron-json-storage');
 
 //INSTRUCTIONS WINDOW
 function createInstructionsWindow() {
@@ -66,4 +67,21 @@ ipcMain.handle("show-message-box", async (_, { title, message, buttons }) => {
     });
     
     return response; // Optionally, return a response if you need to handle button clicks or results in the renderer
+});
+ipcMain.handle("save-settings", async (_, settings) => {
+    return new Promise((resolve, reject) => {
+        storage.set('settings', settings, (error) => {
+            if (error) reject(error);
+            resolve();
+        });
+    });
+});
+
+ipcMain.handle("load-settings", async () => {
+    return new Promise((resolve, reject) => {
+        storage.get('settings', (error, data) => {
+            if (error) reject(error);
+            resolve(data);
+        });
+    });
 });

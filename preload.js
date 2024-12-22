@@ -6,5 +6,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
     openGame: () => {
         ipcRenderer.send("open-game");
+    },
+    saveSettings: (settings) => {
+        return ipcRenderer.invoke("save-settings", settings);
+    },
+    loadSettings: () => {
+        return ipcRenderer.invoke("load-settings");
     }
 });

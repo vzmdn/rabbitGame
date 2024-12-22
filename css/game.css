@@ -36,9 +36,6 @@ td {
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
-
-
-
 #slider{
     background-color: #808080;
     flex: 75%;
@@ -51,7 +48,3 @@ td {
     line-height: 1.2em;
     margin: 5px 0;
   }
-
-#tries{
-    display: none;
-}
