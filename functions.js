@@ -13,10 +13,11 @@ let tries = 0;
 
 let rabbitCell;
 let rabbitCellId;
+let path = [];
+let maxCarrots;
 
 let startTime;
 let endTime;
-let endGame = false;
 
 slider.addEventListener("input", (event) => {
     rowsNum = parseInt(event.target.value);
@@ -44,17 +45,22 @@ window.electronAPI.loadSettings().then(settings => {
 function startGame() {
     console.log("new game started");
     tries = 0;
+    path = [];
+    maxCarrots = parseInt((rowsNum * rowsNum)*0.1);
     createCells();
     paintCells();
     startCells();
     initWalls();
     startTime = new Date().getTime();
+    console.log("maxCarrots", maxCarrots);
+    console.log("tiles", rowsNum*rowsNum);
 }
 
 function refreshGame() {
     clearEventListeners();
     clearWalls();
     currentArrows = [];
+    maxCarrots = 0;
     startGame();
 }
 
@@ -94,6 +100,7 @@ function startRabbit() {
     rabbitCellId = Math.floor(Math.random() * rowsNum * rowsNum);
     rabbitCell = document.getElementById(`td${rabbitCellId}`);
     rabbitCell.addEventListener("click", rabbitFound);
+    path.push(rabbitCellId);
     return rabbitCell;
 }
 
@@ -149,6 +156,7 @@ function rabbitCellMoves() {
         rabbitCell.addEventListener("click", normalCell);
         rabbitCell.innerHTML = "";
         rabbitCellId = newRabbitCellId;
+        path.push(rabbitCellId);
         rabbitCell = document.getElementById(`td${newRabbitCellId}`);
         rabbitCell.removeEventListener("click", normalCell);
         rabbitCell.addEventListener("click", rabbitFound);
@@ -213,7 +221,7 @@ function calculateScore() {
     const timebonus = time / 10_000; //expected time: 10 seconds
     const triesBonus = tries / 10; //expected tries: 10
     const difficultyBonus = 15 / difficulty; //max difficulty = max bonus
-    const mapBonus = (rowsNum * 5) / 8; //max map size = max bonus
+    const mapBonus = (rowsNum * rowsNum) / 80; //max map = max bonus
 
     return (baseScore / (timebonus * triesBonus)) * difficultyBonus * mapBonus;
 }
@@ -227,18 +235,24 @@ function saveSettings() {
     window.electronAPI.saveSettings(settings);
 }
 
+function endGame(){
+for (let i = 0; i < rowsNum * rowsNum; i++) {
+        let td = document.getElementById(`td${i}`);
+        if(!path.includes(i)) td.innerHTML = "🥕";
+        td.removeEventListener("click", normalCell);
+        td.removeEventListener("click", rabbitFound);
+    }
+    rabbitCell.innerHTML = "🐰";
+}
+
 //LISTENERS
 //listener rabbitFound
 function rabbitFound() {
     endTime = new Date().getTime();
-    rabbitCell.innerHTML = "🐰";
+    
     tries++;
     const score = parseInt(calculateScore());
-    for (let i = 0; i < rowsNum * rowsNum; i++) {
-        let td = document.getElementById(`td${i}`);
-        td.removeEventListener("click", normalCell);
-        td.removeEventListener("click", rabbitFound);
-    }
+    endGame();
     message = `Score ${score.toLocaleString()}`;
 
     window.electronAPI.showMessageBox({
@@ -248,7 +262,7 @@ function rabbitFound() {
     }).then(response => {
         if (response.response === 0) {
             // User clicked "Play Again"
-            startGame();
+            refreshGame();
         } else {
             // User clicked "Exit"
             window.close();
@@ -258,6 +272,7 @@ function rabbitFound() {
 
 //listener normalCell
 function normalCell(event) {
+    console.log("path", path);
     rabbitCellMoves();
     let td = event.currentTarget;
     let tdId = parseInt(td.id.slice(2));
@@ -291,6 +306,20 @@ function normalCell(event) {
         let lastCell = document.getElementById(`td${currentArrows[0]}`);
         lastCell.innerHTML = "";
         currentArrows.shift();
+    }
+    if(path.length >= maxCarrots){
+        endGame();
+        window.electronAPI.showMessageBox({
+            title: "Game Over!",
+            message: "Score 0\nThe rabbit ate too many carrots",
+            buttons: ["Play Again", "Exit"]
+        }).then(response => {
+            if (response.response === 0) {
+                refreshGame();
+            } else {
+                window.close();
+            }
+        });
     }
 }
 
