@@ -13,8 +13,10 @@ let tries = 0;
 
 let rabbitCell;
 let rabbitCellId;
-let path = [];
+let carrots = [];
 let maxCarrots;
+let eatenCarrots = 0;
+let eatenCarrotsLimit = 3;
 
 let startTime;
 let endTime;
@@ -45,15 +47,18 @@ window.electronAPI.loadSettings().then(settings => {
 function startGame() {
     console.log("new game started");
     tries = 0;
-    path = [];
-    maxCarrots = parseInt((rowsNum * rowsNum)*0.1);
+    carrots = [];
+    maxCarrots = parseInt((rowsNum * rowsNum) * 0.1);
+    eatenCarrots = 0;
+    eatenCarrotsLimit = parseInt(Math.ceil(Math.sqrt(rowsNum)));
     createCells();
     paintCells();
     startCells();
     initWalls();
     startTime = new Date().getTime();
     console.log("maxCarrots", maxCarrots);
-    console.log("tiles", rowsNum*rowsNum);
+    console.log("tiles", rowsNum * rowsNum);
+    console.log("eatenCarrotsLimit", eatenCarrotsLimit);
 }
 
 function refreshGame() {
@@ -61,6 +66,7 @@ function refreshGame() {
     clearWalls();
     currentArrows = [];
     maxCarrots = 0;
+    eatenCarrots = 0;
     startGame();
 }
 
@@ -75,6 +81,7 @@ function createCells() {
         for (let n = 0; n < rowsNum; n++) {
             rows += `<td id=td${cells}>‍‍‍ </td>`;
             cells++;
+            carrots.push(false);
         }
         rows += `</tr>`;
     }
@@ -100,7 +107,6 @@ function startRabbit() {
     rabbitCellId = Math.floor(Math.random() * rowsNum * rowsNum);
     rabbitCell = document.getElementById(`td${rabbitCellId}`);
     rabbitCell.addEventListener("click", rabbitFound);
-    path.push(rabbitCellId);
     return rabbitCell;
 }
 
@@ -154,13 +160,34 @@ function rabbitCellMoves() {
     if (canMove) {
         rabbitCell.removeEventListener("click", rabbitFound);
         rabbitCell.addEventListener("click", normalCell);
-        rabbitCell.innerHTML = "";
         rabbitCellId = newRabbitCellId;
-        path.push(rabbitCellId);
+        if (!carrots[rabbitCellId]) {
+            carrots[rabbitCellId] = true;
+            eatenCarrots++;
+        };
         rabbitCell = document.getElementById(`td${newRabbitCellId}`);
         rabbitCell.removeEventListener("click", normalCell);
         rabbitCell.addEventListener("click", rabbitFound);
+
+
     }
+}
+
+function rabbitCellMovesRandom() {
+    
+    let newRabbitCellId = Math.floor(Math.random() * rowsNum * rowsNum);
+
+    rabbitCell.removeEventListener("click", rabbitFound);
+    rabbitCell.addEventListener("click", normalCell);
+    rabbitCellId = newRabbitCellId;
+    
+
+    rabbitCell = document.getElementById(`td${newRabbitCellId}`);
+    rabbitCell.removeEventListener("click", normalCell);
+    rabbitCell.addEventListener("click", rabbitFound);
+
+
+
 }
 
 function newPosition() {
@@ -213,8 +240,8 @@ function newPosition() {
 function calculateScore() {
     console.log("tries", tries);
     console.log("difficulty", difficulty);
-    console.log("map tiles", rowsNum*rowsNum);
-    console.log("time", endTime-startTime);
+    console.log("map tiles", rowsNum * rowsNum);
+    console.log("time", endTime - startTime);
 
     const baseScore = 10_000;
     const time = endTime - startTime;
@@ -235,10 +262,11 @@ function saveSettings() {
     window.electronAPI.saveSettings(settings);
 }
 
-function endGame(){
-for (let i = 0; i < rowsNum * rowsNum; i++) {
+function endGame() {
+    for (let i = 0; i < rowsNum * rowsNum; i++) {
         let td = document.getElementById(`td${i}`);
-        if(!path.includes(i)) td.innerHTML = "🥕";
+        if (!carrots[i]) td.innerHTML = "🥕";
+        else td.innerHTML = "";
         td.removeEventListener("click", normalCell);
         td.removeEventListener("click", rabbitFound);
     }
@@ -249,7 +277,7 @@ for (let i = 0; i < rowsNum * rowsNum; i++) {
 //listener rabbitFound
 function rabbitFound() {
     endTime = new Date().getTime();
-    
+
     tries++;
     const score = parseInt(calculateScore());
     endGame();
@@ -272,8 +300,13 @@ function rabbitFound() {
 
 //listener normalCell
 function normalCell(event) {
-    console.log("path", path);
-    rabbitCellMoves();
+    if (eatenCarrots >= eatenCarrotsLimit) {
+        eatenCarrots = 0;
+        rabbitCellMovesRandom();
+
+    } else {
+        rabbitCellMoves();
+    }
     let td = event.currentTarget;
     let tdId = parseInt(td.id.slice(2));
 
@@ -307,7 +340,7 @@ function normalCell(event) {
         lastCell.innerHTML = "";
         currentArrows.shift();
     }
-    if(path.length >= maxCarrots){
+    if (carrots.filter(value => value === true).length >= maxCarrots) {
         endGame();
         window.electronAPI.showMessageBox({
             title: "Game Over!",

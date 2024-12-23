@@ -6,7 +6,7 @@ body,html {
 }
 
 table {
-    border-bottom: 5px solid rgb(0, 134, 60);
+    border: 5px solid rgb(0, 134, 60);
     border-spacing: 0;
     padding: 0;
     width: 100%;
@@ -15,8 +15,8 @@ table {
 }
 
 td {
-    height: 36px;
-    width: 36px;
+    height: 40px;
+    width: 40px;
     text-align: center;
 }
 
