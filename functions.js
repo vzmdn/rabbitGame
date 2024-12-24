@@ -56,9 +56,9 @@ function startGame() {
     startCells();
     initWalls();
     startTime = new Date().getTime();
-    console.log("maxCarrots", maxCarrots);
+    console.log("maximum carrots to be eaten", maxCarrots);
     console.log("tiles", rowsNum * rowsNum);
-    console.log("eatenCarrotsLimit", eatenCarrotsLimit);
+    console.log("jump after n carrots", eatenCarrotsLimit);
 }
 
 function refreshGame() {
@@ -238,6 +238,7 @@ function newPosition() {
 }
 
 function calculateScore() {
+    console.log("///\nSCORE\n///");
     console.log("tries", tries);
     console.log("difficulty", difficulty);
     console.log("map tiles", rowsNum * rowsNum);

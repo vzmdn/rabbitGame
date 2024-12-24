@@ -5,8 +5,8 @@ const storage = require('electron-json-storage');
 //INSTRUCTIONS WINDOW
 function createInstructionsWindow() {
     const instructionsWin = new BrowserWindow({
-        height: 599,
-        width: 587,
+        height: 540,
+        width: 650,
         resizable: false,
         maximizable: false,
         webPreferences: {
