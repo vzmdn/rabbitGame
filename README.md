@@ -16,5 +16,5 @@ Ahora pedimos la ayuda de la comunidad para quitar al conejo. Vamos a ver dónde
 <i>
     <p>Créditos</p>
     <p>Historia: Yuki</p>
-    <p>Juego: vmzdn</p>
+    <p>Juego: Vozmediano</p>
 </i>
